@@ -41,7 +41,7 @@ Then unzip the downloaded data and organize folders using the following structur
         │   │   └── tissue_positions_list.csv
         └── ...
         
-Getting started
+Running GNTD to get the imputed spatial transcriptomics data
 --------------------------------------------------------------------------------
 ```python
 from GNTD import GNTD
