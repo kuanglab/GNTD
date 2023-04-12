@@ -22,7 +22,13 @@ Data preparation
 --------------------------------------------------------------------------------
 
 #### Spatial Transcriptomics Data
-Download Visium spatial transcriptomics data from [10x Genomics](https://support.10xgenomics.com/spatial-gene-expression/datasets/) or [spatialLIBD](http://research.libd.org/spatialLIBD/) and make sure these data are organized in the following structure:
+Download Visium spatial transcriptomics data from [10x Genomics](https://support.10xgenomics.com/spatial-gene-expression/datasets/) or [spatialLIBD](http://research.libd.org/spatialLIBD/). We will use a human heart dataset as an example. 
+
+Under Visium Spatial for FFPE Demonstration (v1 Chemistry)/Visium Demonstration (v1 Chemistray) choose tab "Space Ranger v1.0.0". Click the "Human Heart" link, fill in the form and check the consent to access the data. 
+
+We only use filtered feature-barcode matrix data and spatial coordindates provided in the download file list. They can also be downloaded with following links [filtered feature-barcode matrix data](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Human_Heart/V1_Human_Heart_filtered_feature_bc_matrix.tar.gz) and [spatial coordinates](https://cf.10xgenomics.com/spatial-gene-expression/datasets/V1_Human_Heart/V1_Human_Heart_spatial.tar.gz). The data files are usually less than 100M. It takes less than one minute to download the files.
+
+Then unzip the downloaded data and organize folders using the following structure under a home-folder for your experiment:
 
         . <data-folder>
         ├── ...
