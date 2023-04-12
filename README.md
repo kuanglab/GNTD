@@ -41,7 +41,7 @@ Then unzip the downloaded data and organize folders using the following structur
         │   │   └── tissue_positions_list.csv
         └── ...
 #### Protein-protein Interaction Data
-The current PPI networks can be downloaded from [Biograid](https://thebiogrid.org/). This example uses [human PPI network]() in [Biograd version 3.0](https://wiki.thebiogrid.org/doku.php/biogrid_tab_version_3.0). INSTRUCTION on how to process the BioGRID files.
+The current PPI networks can be downloaded from [Biograid](https://thebiogrid.org/). This example uses human PPI network in [Biograd version 4.x](). Download the BioGRID files and put the tab3 file under a folder for the PPI data. 
 
 Running GNTD to get the imputed spatial transcriptomics data
 --------------------------------------------------------------------------------
