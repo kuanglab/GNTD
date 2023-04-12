@@ -3,8 +3,9 @@ Reconstructing Spatial Transcriptomes with Graph-guided Neural Tensor Decomposit
 
 ![](https://github.com/kuanglab/GNTD/blob/main/GNTD_Workflow.png)
 
-Package requirements
+Installation and package requirements
 --------------------------------------------------------------------
+The python package can be downloaded and run with the following library versions.
 ```
 [python 3.8.12]
 [numpy 1.21.5]
@@ -21,7 +22,7 @@ Data preparation
 --------------------------------------------------------------------------------
 
 #### Spatial Transcriptomics Data
-Please download Visium spatial transcriptomics data from [10x Genomics](https://support.10xgenomics.com/spatial-gene-expression/datasets/) or [spatialLIBD](http://research.libd.org/spatialLIBD/) and make sure these data are organized in the following structure:
+Download Visium spatial transcriptomics data from [10x Genomics](https://support.10xgenomics.com/spatial-gene-expression/datasets/) or [spatialLIBD](http://research.libd.org/spatialLIBD/) and make sure these data are organized in the following structure:
 
         . <data-folder>
         ├── ...
@@ -50,6 +51,3 @@ expr_tensor, A_g, A_xy, ensembl_ids, gene_names, mapping = preprocessing(raw_dat
 model = GNTD(expr_tensor, A_g, A_xy, rank, l)
 expr_tensor_hat = model.impute()
 ```
-
-Under construction ...
-
