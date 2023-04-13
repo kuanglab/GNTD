@@ -18,8 +18,9 @@ tl.set_backend('pytorch')
 
 def preprocessing(raw_data_path, PPI_data_path, load_labels=False,
                   use_coexpression=True, use_PPI=True, 
-                  use_highly_variable=True, apply_normalization=True,
-                  n_pcs=15, n_neighbors=10, n_top_genes=3000):
+                  use_highly_variable=True, use_all_entries=False,
+                  apply_normalization=True, n_pcs=15, n_neighbors=10, 
+                  n_top_genes=3000):
     
     '''
     Parameters:
@@ -61,6 +62,9 @@ def preprocessing(raw_data_path, PPI_data_path, load_labels=False,
                          profile of highly variable genes only (Note that 
                          the number of highly varibale genes is determined 
                          by the parameter n_top_genes)
+                         
+    use_all_entries: the flag to determine whether to include all entries in 
+                     the tensor for model training
     
     apply_normalization: the flag to determine whether to apply normalization 
                          to raw UMI counts (Note that raw UMI counts will be 
@@ -227,8 +231,9 @@ def preprocessing(raw_data_path, PPI_data_path, load_labels=False,
     
     if use_coexpression:
         
-        expr_mat_norm = torch.from_numpy(expr_mat)
-        expr_mat_norm = tl.unfold(expr_mat_norm, 0).numpy().T
+        #expr_mat_norm = torch.from_numpy(expr_mat)
+        #expr_mat_norm = tl.unfold(expr_mat_norm, 0).numpy().T
+        expr_mat_norm = expr_mat.reshape(n_g, -1).T
         expr_mat_norm = anndata.AnnData(expr_mat_norm)
         sc.pp.highly_variable_genes(expr_mat_norm, flavor="seurat_v3", n_top_genes=n_top_genes)
         sc.pp.normalize_total(expr_mat_norm, target_sum=1e4)
@@ -242,8 +247,9 @@ def preprocessing(raw_data_path, PPI_data_path, load_labels=False,
         A_xy[A_xy>1] = 1
     
     # Apply normalization
-    expr_mat = torch.from_numpy(expr_mat)
-    expr_mat = tl.unfold(expr_mat, 0).numpy().T
+    #expr_mat = torch.from_numpy(expr_mat)
+    #expr_mat = tl.unfold(expr_mat, 0).numpy().T
+    expr_mat = expr_mat.reshape(n_g, -1).T
     expr_mat = anndata.AnnData(expr_mat)
     sc.pp.highly_variable_genes(expr_mat, flavor="seurat_v3", n_top_genes=n_top_genes)
     
@@ -260,12 +266,20 @@ def preprocessing(raw_data_path, PPI_data_path, load_labels=False,
         A_g = A_g[np.ix_(index, index)]
         feature_ids_PPI = feature_ids_PPI[index]
         gene_names_PPI = gene_names_PPI[index]
-        expr_mat = torch.from_numpy(expr_mat.X[:, index].T)
+        expr_mat = expr_mat.X[:, index].T
     else:
-        expr_mat = torch.from_numpy(expr_mat.X.T)
+        expr_mat = expr_mat.X.T
     
     # Convert normalization expression data into a sparse tensor format
-    expr_mat = tl.fold(expr_mat, 0, (n_g, n_x, n_y))
+    if use_all_entries:
+        expr_mat_ = expr_mat[:, spot_idx[0]]
+        expr_mat_[np.where(expr_mat_==0)] = -1
+        expr_mat[:, spot_idx[0]] = expr_mat_
+    
+    #expr_mat = torch.from_numpy(expr_mat)  
+    #expr_mat = tl.fold(expr_mat, 0, (n_g, n_x, n_y))
+    expr_mat = expr_mat.reshape(n_g, n_x, n_y)
+    expr_mat = torch.from_numpy(expr_mat) 
     expr_tensor = expr_mat.to_sparse()
     
     return expr_tensor, A_g, A_xy, feature_ids_PPI, gene_names_PPI, mapping

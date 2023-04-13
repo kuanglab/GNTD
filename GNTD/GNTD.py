@@ -1,4 +1,5 @@
 import torch
+import warnings
 import numpy as np
 import torch.nn.functional as F
 
@@ -6,29 +7,38 @@ from NTD import NTD
 from tqdm import tqdm
 from sklearn.model_selection import ShuffleSplit
 from utils import MSE, MAE, RMSE, MAPE, R2, generate_graph_Laplacian
+from preprocessing import preprocessing
 
 class GNTD():
     
     # Initialization
-    def __init__(self, expr_tensor, A_g, A_xy, rank, l):
+    def __init__(self, raw_data_path, PPI_data_path):
         
         '''
-        expr_tensor: expression tensor
-        A_g: adjacency matrix of PPI graph
-        A_xy: adjacency matrix of spatial graph
-        rank: tensor rank
-        l: weight on Cartesian product graph Laplacian regularization
+        raw_data_path: expression tensor
+        PPI_data_path: adjacency matrix of PPI graph
         '''
         
-        # Model parameters
-        self.rank = rank
-        self.l = l
+        self.raw_data_path = raw_data_path
+        self.PPI_data_path = PPI_data_path
         
-        self.n_g, self.n_x, self.n_y = expr_tensor.shape
-        self.expr_tensor = expr_tensor
+        
+    def preprocess(self, load_labels=False, use_coexpression=True, 
+                   use_PPI=True, use_highly_variable=True, 
+                   use_all_entries=False, apply_normalization=True, 
+                   n_pcs=15, n_neighbors=10, n_top_genes=3000):
+        
+        '''
+        Please see more details about parameters in preprocessing.py
+        '''
+        
+        # Preprocess
+        self.expr_tensor, self.A_g, self.A_xy, self.feature_ids, self.gene_names, self.mapping = preprocessing(self.raw_data_path, self.PPI_data_path, load_labels=load_labels, use_coexpression=use_coexpression, use_PPI=use_PPI, use_highly_variable=use_highly_variable, use_all_entries=use_all_entries, apply_normalization=apply_normalization, n_pcs=n_pcs, n_neighbors=n_neighbors, n_top_genes=n_top_genes)
+        
+        self.n_g, self.n_x, self.n_y = self.expr_tensor.shape
         
         # Compute graph Laplacian for both PPI and spatial graphs
-        self.L_g, self.L_xy = [generate_graph_Laplacian(A) for A in [A_g, A_xy]]
+        self.L_g, self.L_xy = [generate_graph_Laplacian(A) for A in [self.A_g, self.A_xy]]
         
     
     # Generate index and value pairs for training and validation sets to select GNTD model
@@ -44,10 +54,12 @@ class GNTD():
         training_index, validation_index = next(ss.split(X=index))
         
         training_expr = self.expr_tensor.values()[training_index]
+        training_expr[torch.where(training_expr<0)] = 0
         training_index = self.expr_tensor.indices()[:, training_index]
         training_index = training_index[0, :]*self.n_x*self.n_y + training_index[1, :]*self.n_y + training_index[2, :]
         
         validation_expr = self.expr_tensor.values()[validation_index]
+        validation_expr[torch.where(validation_expr<0)] = 0
         validation_index = self.expr_tensor.indices()[:, validation_index]
         validation_index = validation_index[0, :]*self.n_x*self.n_y + validation_index[1, :]*self.n_y + validation_index[2, :]
         
@@ -112,12 +124,18 @@ class GNTD():
 
         return expr_tensor_hat
         
-    def impute(self, lr=0.05, max_epoch=3000, verbose=True):
+    def impute(self,  rank, l, lr=0.05, max_epoch=3000, verbose=True):
         
         '''
+        rank: tensor rank
+        l: weight on Cartesian product graph Laplacian regularization
         lr: learning rate
         max_epoch: number of maximum epochs
         '''
+        
+        # Model parameters
+        self.rank = rank
+        self.l = l
         
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
@@ -167,11 +185,52 @@ class GNTD():
         self.model.load_state_dict(torch.load(checkpoint))
         expr_tensor_hat = self.__test(x_index, y_index, g_index)
         self.expr_tensor_hat = expr_tensor_hat
-        
-        return expr_tensor_hat
     
-    def to_numpy(self):
+    # Obtain raw gene expression data for selected genes
+    def get_raw_expr_mat(self, gene_names=None):
         
-        return self.expr_tensor_hat.numpy()
+        spot_idx = np.where(self.mapping[:, -1] != -2)
+        expr_mat = self.expr_tensor.to_dense().numpy()
+        expr_mat[np.where(expr_mat<0)] = 0
+        expr_mat = expr_mat.reshape(self.n_g, -1).T
+        expr_mat = expr_mat[spot_idx]
+        if gene_names == None:
+            return expr_mat, self.gene_names
+        else:
+            overlapped_gene_names = np.array([gene_name for gene_name in np.char.lower(gene_names) if gene_name in self.gene_names])
+            if len(overlapped_gene_names) == 0:
+                warnings.warn('no genes found, the expression matrix for all genes will be returned')
+                return expr_mat, self.gene_names
+            else:
+                gene_idx = np.array([np.where(self.gene_names == gene_name)[0] for gene_name in overlapped_gene_names])
+                expr_mat = expr_mat[:, gene_idx]
+                return expr_mat, overlapped_gene_names
+    
+    # Obtain imputed gene expression data for selected genes
+    def get_imputed_expr_mat(self, gene_names=None):
+        
+        spot_idx = np.where(self.mapping[:, -1] != -2)
+        expr_mat = self.expr_tensor_hat.numpy().reshape(self.n_g, -1).T
+        expr_mat = expr_mat[spot_idx]
+        if gene_names == None:
+            return expr_mat, self.gene_names
+        else:
+            overlapped_gene_names = np.array([gene_name for gene_name in np.char.lower(gene_names) if gene_name in self.gene_names])
+            if len(overlapped_gene_names) == 0:
+                warnings.warn('no genes found, the expression matrix for all genes will be returned')
+                return expr_mat, self.gene_names
+            else:
+                gene_idx = np.array([np.where(self.gene_names == gene_name)[0] for gene_name in overlapped_gene_names])
+                expr_mat = expr_mat[:, gene_idx]
+                return expr_mat, overlapped_gene_names
+    
+    # Obtain spatial coordinates
+    def get_sp_coords(self):
+        
+        spot_idx = np.where(self.mapping[:, -1] != -2)
+        x_coords = self.mapping[spot_idx[0], 3]
+        y_coords = self.mapping[spot_idx[0], 2]
+        
+        return x_coords, y_coords
         
     
