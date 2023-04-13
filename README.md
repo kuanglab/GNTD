@@ -70,4 +70,9 @@ Gene visualization in the imputed spatial transcriptomics data
 
 Clustering the imputed spatial transcriptomics data
 --------------------------------------------------------------------------------
+Reference
+--------------------------------------------------------------------------------
+[Reconstructing Spatial Transcriptomes with Graph-guided Neural Tensor Decomposition Informed by Spatial and Functional Relations](https://www.researchsquare.com/article/rs-2764431/v1)
+Rui Kuang, Tianci Song, Charles Broadbent
+Under Review
 
