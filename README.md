@@ -42,7 +42,7 @@ Then unzip the downloaded data and organize folders using the following structur
         └── ...
         
 #### Protein-protein Interaction Data
-The current PPI networks can be downloaded from [BioGRID](https://thebiogrid.org/). This example uses human PPI network in [BioGRID version 4.4.209](https://downloads.thebiogrid.org/File/BioGRID/Release-Archive/BIOGRID-4.4.209/BIOGRID-ORGANISM-4.4.209.tab3.zip). Download and unzip the BIOGRID-ORGANISM-4.4.209.tab3.zip file and place the "BIOGRID-ORGANISM-<species>-4.4.209.tab3.txt" file under a folder as the PPI data. We will use a mouse PPI network (BIOGRID-ORGANISM-Mus_musculus-4.4.209.tab3.txt) as an example. 
+The current PPI networks can be downloaded from [BioGRID](https://thebiogrid.org/). This example uses mouse PPI network in [BioGRID version 4.4.209](https://downloads.thebiogrid.org/File/BioGRID/Release-Archive/BIOGRID-4.4.209/BIOGRID-ORGANISM-4.4.209.tab3.zip). Download and unzip the BIOGRID-ORGANISM-4.4.209.tab3.zip file and place the "BIOGRID-ORGANISM-<species>-4.4.209.tab3.txt" file under a folder as the PPI data (Please replace <species> with Mus_musculus to run the example).
 
         . <data-folder>
         ├── ...
