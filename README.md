@@ -72,7 +72,5 @@ Clustering the imputed spatial transcriptomics data
 --------------------------------------------------------------------------------
 Reference
 --------------------------------------------------------------------------------
-[Reconstructing Spatial Transcriptomes with Graph-guided Neural Tensor Decomposition Informed by Spatial and Functional Relations](https://www.researchsquare.com/article/rs-2764431/v1)
-Rui Kuang, Tianci Song, Charles Broadbent
-Under Review
+[Reconstructing Spatial Transcriptomes with Graph-guided Neural Tensor Decomposition Informed by Spatial and Functional Relations](https://www.researchsquare.com/article/rs-2764431/v1), Tianci Song, Charles Broadbent and Rui Kuang, Under Review
 
