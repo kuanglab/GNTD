@@ -80,7 +80,10 @@ model.impute(rank, l) # Imputation
 
 expr_mat, gene_names = model.get_imputed_expr_mat() # Return a spot by gene imputed expression matrix
                                                     # and corresponding gene names, where spots in the 
-                                                    # matrix are overlapped with the tissue section
+                                                    # matrix are overlapped with the tissue section, to
+                                                    # get the imputed expression matrix for a subset of
+                                                    # genes, please use the parameter gene_names, e.g.
+                                                    # model.get_imputed_expr_mat(gene_names)
 ```
 
 Clustering the imputed spatial transcriptomics data
@@ -105,9 +108,9 @@ from sklearn.decomposition import PCA
 
 # To run clustering with mclust, please make sure you install 
 # rpy2 in python, and mclust in R
-os.environ['R_HOME'] = '<Path-to-R>'
+os.environ['R_HOME'] = '<Path-to-R>' # Set R path
 import rpy2.robjects as robjects
-robjects.r.library("mclust")
+robjects.r.library("mclust") # Load library mclust
 import rpy2.robjects.numpy2ri
 rpy2.robjects.numpy2ri.activate()
 r_random_seed = robjects.r['set.seed']
@@ -121,8 +124,7 @@ fig, ax = plt.subplots(figsize=(5, 5))
 
 n_components = 10 # the number of principal components
 expr_mat, gene_names = model.get_imputed_expr_mat() # Get a spot by gene imputed expression matrix
-                                                    # and corresponding gene names, where spots in the 
-                                                    # matrix are overlapped with the tissue section
+                                                    # and corresponding gene names
 expr_mat_hat = PCA(n_components=n_components).fit_transform(expr_mat) # Run PCA
 mclust = Mclust(rpy2.robjects.numpy2ri.numpy2rpy(expr_mat_hat), 25, "EEE") # Run mclust 
 clustering_labels = mclust[-2] # Extract clustering labels from mclust results
@@ -151,14 +153,13 @@ model.impute(rank, l) # Imputation (Runtime: ~10mins)
 import matplotlib.pyplot as plt
 %matplotlib inline
 
-gene_name = 'LAMP2' # Select to visualize
+gene_name = 'LAMP2' # Select gene to visualize
 
 fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(10, 5))
 
 # Visualization for raw spatial expression 
 expr_mat, gene_names = model.get_raw_expr_mat(gene_names=[gene_name]) # Get a spot by gene raw expression matrix
-                                                                      # and corresponding gene names, where spots in the 
-                                                                      # matrix are overlapped with the tissue section
+                                                                      # and corresponding gene names
 x_coords, y_coords = model.get_sp_coords() # Get spatial coorindates of spots for visualization
 axs[0].scatter(x_coords, y_coords, c=expr_mat[:, 0], cmap='RdYlBu_r', s=10)
 axs[0].set_ylim(axs[0].get_ylim()[::-1])
