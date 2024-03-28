@@ -182,5 +182,5 @@ axs[1].set_title('Imputation', fontsize=16)
 
 Reference
 --------------------------------------------------------------------------------
-[Reconstructing Spatial Transcriptomes with Graph-guided Neural Tensor Decomposition Informed by Spatial and Functional Relations](https://www.researchsquare.com/article/rs-2764431/v1), Tianci Song, Charles Broadbent and Rui Kuang, Under Review
+[GNTD: Reconstructing Spatial Transcriptomes with Graph-guided Neural Tensor Decomposition Informed by Spatial and Functional Relations](https://www.nature.com/articles/s41467-023-44017-0), Tianci Song, Charles Broadbent and Rui Kuang, Nature Communications, 14, Article number: 8276 (2023)
 
